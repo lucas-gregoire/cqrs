@@ -28,20 +28,19 @@ export type QueryHandlerType<
 @Injectable()
 export class QueryBus<QueryBase extends IQuery = IQuery>
   extends ObservableBus<QueryBase>
-  implements IQueryBus<QueryBase>
-{
+  implements IQueryBus<QueryBase> {
   private readonly logger = new Logger(QueryBus.name);
-  private handlers = new Map<
+  protected readonly handlers = new Map<
     string,
     (query: QueryBase, asyncContext?: AsyncContext) => any
   >();
   private _publisher: IQueryPublisher<QueryBase>;
 
   constructor(
-    private readonly moduleRef: ModuleRef,
+    protected readonly moduleRef: ModuleRef,
     @Optional()
     @Inject(CQRS_MODULE_OPTIONS)
-    private readonly options?: CqrsModuleOptions,
+    protected readonly options?: CqrsModuleOptions,
   ) {
     super();
 
@@ -163,7 +162,7 @@ export class QueryBus<QueryBase extends IQuery = IQuery>
     this.bind(handler, target);
   }
 
-  private getQueryId(query: QueryBase): string {
+  protected getQueryId(query: QueryBase): string {
     const { constructor: queryType } = Object.getPrototypeOf(query);
     const queryMetadata: QueryMetadata = Reflect.getMetadata(
       QUERY_METADATA,
@@ -194,7 +193,7 @@ export class QueryBus<QueryBase extends IQuery = IQuery>
     this._publisher = new DefaultQueryPubSub<QueryBase>(this.subject$);
   }
 
-  private getQueryName(query: QueryBase): string {
+  protected getQueryName(query: QueryBase): string {
     const { constructor } = Object.getPrototypeOf(query);
     return constructor.name as string;
   }

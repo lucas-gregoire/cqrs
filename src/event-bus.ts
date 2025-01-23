@@ -41,8 +41,7 @@ export type EventHandlerType<EventBase extends IEvent = IEvent> = Type<
 @Injectable()
 export class EventBus<EventBase extends IEvent = IEvent>
   extends ObservableBus<EventBase>
-  implements IEventBus<EventBase>, OnModuleDestroy
-{
+  implements IEventBus<EventBase>, OnModuleDestroy {
   protected eventIdProvider: EventIdProvider<EventBase>;
   protected readonly subscriptions: Subscription[];
 
@@ -51,11 +50,11 @@ export class EventBus<EventBase extends IEvent = IEvent>
 
   constructor(
     private readonly commandBus: CommandBus,
-    private readonly moduleRef: ModuleRef,
+    protected readonly moduleRef: ModuleRef,
     private readonly unhandledExceptionBus: UnhandledExceptionBus,
     @Optional()
     @Inject(CQRS_MODULE_OPTIONS)
-    private readonly options?: CqrsModuleOptions,
+    protected readonly options?: CqrsModuleOptions,
   ) {
     super();
     this.subscriptions = [];
@@ -227,19 +226,19 @@ export class EventBus<EventBase extends IEvent = IEvent>
 
     const deferred = handler.isDependencyTreeStatic()
       ? (event: EventBase) => () => {
-          return Promise.resolve(handler.instance.handle(event));
-        }
+        return Promise.resolve(handler.instance.handle(event));
+      }
       : (event: EventBase) => async () => {
-          const asyncContext = AsyncContext.of(event) ?? new AsyncContext();
-          const instance = await this.moduleRef.resolve(
-            handler.metatype!,
-            asyncContext.id,
-            {
-              strict: false,
-            },
-          );
-          return instance.handle(event);
-        };
+        const asyncContext = AsyncContext.of(event) ?? new AsyncContext();
+        const instance = await this.moduleRef.resolve(
+          handler.metatype!,
+          asyncContext.id,
+          {
+            strict: false,
+          },
+        );
+        return instance.handle(event);
+      };
 
     const subscription = stream$
       .pipe(
@@ -368,7 +367,7 @@ export class EventBus<EventBase extends IEvent = IEvent>
     this.subscriptions.push(subscription);
   }
 
-  private reflectEvents(
+  protected reflectEvents(
     handler: EventHandlerType<EventBase>,
   ): Type<EventBase>[] {
     return Reflect.getMetadata(EVENTS_HANDLER_METADATA, handler);
