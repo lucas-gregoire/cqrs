@@ -35,17 +35,17 @@ export class CommandBus<CommandBase extends ICommand = ICommand>
   implements ICommandBus<CommandBase>
 {
   private readonly logger = new Logger(CommandBus.name);
-  private handlers = new Map<
+  protected readonly handlers = new Map<
     string,
     (command: CommandBase, asyncContext?: AsyncContext) => any
   >();
   private _publisher: ICommandPublisher<CommandBase>;
 
   constructor(
-    private readonly moduleRef: ModuleRef,
+    protected readonly moduleRef: ModuleRef,
     @Optional()
     @Inject(CQRS_MODULE_OPTIONS)
-    private readonly options?: CqrsModuleOptions,
+    protected readonly options?: CqrsModuleOptions,
   ) {
     super();
 
@@ -177,7 +177,7 @@ export class CommandBus<CommandBase extends ICommand = ICommand>
     this.bind(handler, target);
   }
 
-  private getCommandId(command: CommandBase): string {
+  protected getCommandId(command: CommandBase): string {
     const { constructor: commandType } = Object.getPrototypeOf(command);
     const commandMetadata: CommandMetadata = Reflect.getMetadata(
       COMMAND_METADATA,
@@ -190,7 +190,7 @@ export class CommandBus<CommandBase extends ICommand = ICommand>
     return commandMetadata.id;
   }
 
-  private getCommandName(command: CommandBase): string {
+  protected getCommandName(command: CommandBase): string {
     const { constructor } = Object.getPrototypeOf(command);
     return constructor.name as string;
   }

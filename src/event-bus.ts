@@ -64,11 +64,11 @@ export class EventBus<EventBase extends IEvent = IEvent>
 
   constructor(
     private readonly commandBus: CommandBus,
-    private readonly moduleRef: ModuleRef,
+    protected readonly moduleRef: ModuleRef,
     private readonly unhandledExceptionBus: UnhandledExceptionBus,
     @Optional()
     @Inject(CQRS_MODULE_OPTIONS)
-    private readonly options?: CqrsModuleOptions,
+    protected readonly options?: CqrsModuleOptions,
   ) {
     super();
     this.subscriptions = [];
@@ -387,7 +387,7 @@ export class EventBus<EventBase extends IEvent = IEvent>
     this.subscriptions.push(subscription);
   }
 
-  private reflectEvents(
+  protected reflectEvents(
     handler: EventHandlerType<EventBase>,
   ): Type<EventBase>[] {
     return Reflect.getMetadata(EVENTS_HANDLER_METADATA, handler);
